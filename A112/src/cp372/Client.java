@@ -1,62 +1,45 @@
 package cp372;
 
+import java.net.*; 
+import java.io.*; 
+import javax.swing.JOptionPane;
 public class Client {
-	//ISBN-13 validatior 
-	public static boolean validateIsbn( String isbn )
-    {
-		boolean isValid; 
-		
-        if ( isbn == null )
-        {
-        	isValid =  false;
+    
+    private Socket socket = null; 
+    private DataInputStream input = null; 
+    private DataOutputStream output = null; 
+    
+    
+    public void connect(String ip, int port) {
+        
+        try {
+            socket = new Socket(ip, port); 
+            input = new DataInputStream(System.in); 
+            output = new DataOutputStream(socket.getOutputStream()); 
+            JOptionPane.showMessageDialog(null, "Connection Successful", null, JOptionPane.ERROR_MESSAGE); 
         }
-
-        //remove any hyphens
-        isbn = isbn.replaceAll( "-", "" );
-        int len = isbn.length(); 
-        //must be a 13 digit ISBN
-        if (len != 13)
-        {
-        	isValid = false;
+        catch (UnknownHostException u) {
+            JOptionPane.showMessageDialog(null, "Connection Failed", null, JOptionPane.ERROR_MESSAGE); 
         }
-
-        try
-        {
-            int sum = 0;
-            for ( int i = 0; i < 12; i++ )
-            {
-                int digit = Integer.parseInt( isbn.substring( i, i + 1 ) );
-                if (i % 2 == 0) {
-                	sum+= (digit*1); 
-                }
-                else {
-                	sum+= (digit*3); 
-                }
-//                sum += (i % 2 == 0) ? digit * 1 : digit * 3;
-            }
-
-            //checksum must be 0-9. If calculated as 10 then = 0
-            int checksum = 10 - (sum % 10);
-            if ( checksum == 10 )
-            {
-                checksum = 0;
-            }
-
-            if ((checksum == Integer.parseInt(isbn.substring(12))) == true ) {
-            	isValid = true; 
-            }
-            else {
-            	isValid = false; 
-            }
+        catch (IOException i) {
+            JOptionPane.showMessageDialog(null, "Connection Failed", null, JOptionPane.ERROR_MESSAGE);
         }
-        catch ( NumberFormatException nfe )
-        {
-            //to catch invalid ISBNs that have non-numeric characters in them
-        	isValid = false;
-        }
-       return isValid;
+        //close connections
+        close(); 
+    
     }
-
+    
+    public void close(){
+        //close connections 
+        try {
+            input.close();
+            output.close(); 
+            socket.close();
+        }
+        catch(IOException i) {
+        }
+        
+    }
 
 }
 

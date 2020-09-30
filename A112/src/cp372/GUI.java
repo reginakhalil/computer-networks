@@ -9,11 +9,14 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 @SuppressWarnings("serial")
 public class GUI extends JFrame {
@@ -44,15 +47,8 @@ public class GUI extends JFrame {
 		Disconnect.setEnabled(false);
 		
 		JButton Connect = new JButton("Connect");
-		
-		
-		// buttons 
-		JButton submit  = new JButton("Send");
-		Submit.setEnabled(false);
-		JButton disconnect  = new JButton("Disconnect");
-		Disconnect.setEnabled(false);
-		
-		JButton connect = new JButton("Connect");
+	
+		JButton Delete = new JButton("Clear");
 
 		// check box 
 		JCheckBox all = new JCheckBox("All");
@@ -84,12 +80,15 @@ public class GUI extends JFrame {
 		ipPanle.add(ipLabel);
 		ipPanle.add(ip);
 		ipPanle.add(Connect);
-		ipPanle.add(Disconnect);
+		
+		
 		newIpPanle.add(dropLable);
 		newIpPanle.add(dropBox);
 		newIpPanle.add(Submit);
+		newIpPanle.add(Delete);
 		newIpPanle.add(all);
 		newIpPanle.add(bibtex);
+		newIpPanle.add(Disconnect);
 		communcasPane.add(ipPanle);
 		communcasPane.add(newIpPanle);
 		
@@ -104,6 +103,34 @@ public class GUI extends JFrame {
 		communcationsPane.add(new JScrollPane(serverTextArea));
 		
 		add(communcationsPane);
+	
+		
+		//Action Listeners 
+	    Connect.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (ip.getText().isEmpty() && port.getText().isEmpty()) {
+					JOptionPane.showMessageDialog(null, "Must enter an IP address and a port number", null, JOptionPane.ERROR_MESSAGE);
+				}
+				else if (port.getText().isEmpty()) {
+					JOptionPane.showMessageDialog(null, "Must enter a port number", null, JOptionPane.ERROR_MESSAGE);
+				}
+				else if (ip.getText().isEmpty()) {
+					JOptionPane.showMessageDialog(null, "Must enter an IP address", null, JOptionPane.ERROR_MESSAGE);
+				}
+
+					
+				
+			}
+	    });
+	    Delete.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				clientTextArea.setText("");
+				
+			}
+	    });
 
 	}
 }
