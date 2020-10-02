@@ -47,8 +47,7 @@ public class GUI extends JFrame {
 		JLabel ipLabel = new JLabel("IP:");
 		JLabel portLabel  = new JLabel("Port:");
 		JLabel dropLable = new JLabel("Requests Type:");
-		
-//		JLabel cientTextAreaLabel  = new JLabel("Request Message"); 
+
 		JLabel serverTextAreaLable  = new JLabel("Resposne Message:");
 		
 		
@@ -148,25 +147,27 @@ public class GUI extends JFrame {
 				String ip_address = ip.getText(); 
 				String port_number = port.getText(); 
 				
-				int port_num = Integer.parseInt(port_number); 
 				
-				if (ip_address.isEmpty() && port_number.isEmpty()) {
+				
+				if (ip_address.equals("") && port_number.equals("")) {
 					JOptionPane.showMessageDialog(null, "Must enter an IP address and a port number", null, JOptionPane.ERROR_MESSAGE);
 				}
-				else if (port_number.isEmpty()) {
+				else if (port_number.equals("")) {
 					JOptionPane.showMessageDialog(null, "Must enter a port number", null, JOptionPane.ERROR_MESSAGE);
 				}
-				else if (ip_address.isEmpty()) {
+				else if (ip_address.equals("")) {
 					JOptionPane.showMessageDialog(null, "Must enter an IP address", null, JOptionPane.ERROR_MESSAGE);
 				}
 				
+				 
 				//if connected then enable disconnect button
 				if (!ip_address.isEmpty() && !port_number.isEmpty()) {
+					//need to validate port and IP
+					int port_num = Integer.parseInt(port_number);
 					if(client.connect(ip_address, port_num));
 						Disconnect.setEnabled(true);
 				}
-		
-
+	
 			}
 	    });
 	    
@@ -201,10 +202,7 @@ public class GUI extends JFrame {
 				
 				if (validrequest) {
 					client.sendRequest(request);
-				}
-		
-				
-				
+				}		
 			}
 	    });
 	    

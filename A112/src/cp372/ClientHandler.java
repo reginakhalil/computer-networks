@@ -1,14 +1,13 @@
 package cp372;
 
 import java.net.*; 
+
 import java.io.*; 
 import javax.swing.JOptionPane;
 public class ClientHandler {
     
     private Socket socket = null; 
-//  private DataInputStream input = null; 
     private PrintWriter output = null; 
-    
     private BufferedReader input = null; 
     
     public boolean connect(String ip, int port) {
