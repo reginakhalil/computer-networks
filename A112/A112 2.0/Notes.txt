@@ -1,0 +1,13 @@
+These have the default package because that's what he wanted
+any comments with // are what we got to complete, but other than that everything is good. 
+
+COMMAND LINE:
+How to run a java program
+1. Open a command prompt window and go to the directory where you saved the java program (MyFirstJavaProgram. java). ...
+2. Type 'javac MyFirstJavaProgram. java' and press enter to compile your code. ...
+3. Now, type ' java MyFirstJavaProgram ' to run your program.
+4. You will be able to see the result printed on the window.
+
+so they DO NOT connect with each other but separately;
+so test each on their own :)
+good luck <3
