@@ -262,19 +262,19 @@ public class Client extends JFrame {
 					/*
 					 *  if statements to check if they fields are empty before sending data
 					 */
-					if (Isbn.isEmpty() || Isbn == "") {
+					if (Isbn.isEmpty()) {
 						Isbn = null;
 					}
 					
-					if (book_title.isEmpty() || book_title == "") {
+					if (book_title.isEmpty()) {
 						book_title = null;
 					}
 					
-					if (book_auth.isEmpty() || book_auth == "") {
+					if (book_auth.isEmpty()) {
 						book_auth = null;
 					}
 					
-					if (book_year.isEmpty() || book_year == "") {
+					if (book_year.isEmpty()) {
 						book_year = null;
 					}
 					
@@ -306,8 +306,9 @@ public class Client extends JFrame {
 						try {
 							ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
 							output.writeObject(entry);
-
 							input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+							String re = input.readLine();
+							serverTextArea.setText(re);
 								
 						} catch (Exception e1) {
 							JOptionPane.showMessageDialog(null, "Cannot send to server", null, JOptionPane.ERROR_MESSAGE);
