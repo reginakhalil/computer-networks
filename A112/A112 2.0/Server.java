@@ -159,7 +159,28 @@ public class Server {
 				String bibtex = "@BOOK{" + citekey + ",\n@title = " + getTitle() + "\nauthor = " + getAuthor() + "\npublisher = " + getPub() + "\nyear = " + getYear(); 
 				return bibtex;	
 				}
+
+			public String toString() {
+				this.request = " ";
+				if(this.isbn != "") {
+					this.request = this.request + "ISBN" + " "+ this.isbn;
+				}
+				if(this.title != "") {
+					this.request = this.request + "TITLE" + " "+ this.title;
+				}
+				if(this.author != "") {
+					this.request = this.request + "AUTHOR" + " "+ this.author;
+				}
+				if(this.publisher != "") {
+					this.request = this.request + "PUBLISHER" + " "+ this.publisher;
+				}
+				if(this.year != "") {
+					this.request = this.request + "YEAR" + " "+ this.year;
+				}
+				System.out.println(this.request);
+				return this.request;
 			}
+		}
 		
 		public void createEntry (ArrayList <String> entry, PrintWriter output) {
 			/* 
@@ -223,11 +244,11 @@ public class Server {
 		}
 		
 		public void getEntry (ArrayList <String> entry, PrintWriter output) {
-			String isbn;
-			String title;
-			String author;
-			String year;
-			String publisher;
+			String isbn = entry.getISBN();
+			String title = entry.getTitle();
+			String author = entry.getAuthor();
+			String year = entry.getYear(); 
+			String publisher = entry.getPub();
 			
 			/* NEED THIS 
 			 * basically whatever isnt null, compare with like allEntries.get(i).getTitle or something, flush whatever matches
@@ -235,17 +256,32 @@ public class Server {
 			 * ArrList:
 			 * [req, all, bibtex, isbn, title, author, yr, publisher]
 			 */ 
+			ArrayList<Book> books = new ArrayList<Book>();
 
 			try {
 				output = new PrintWriter(s.getOutputStream(), true); 
 				String entriesFound = "Bibliographies found: ";
 				
-				for (i=0; i < allEntries.size(); i++) {
 
-					if allEntries[i] == entry{
-						entriesFound = entriesFound + "\n" + entry;
+				for (i=0; i < allEntries.size(); i++) {
+					Book temp = allEntries.get(i); 
+					if(
+						(isbn.isEmpty() || temp.isbn.equals(b.isbn)) &&
+						(title.isEmpty() || temp.title.equals(b.title)) &&
+						(author.isEmpty() || temp.author.equals(b.author)) &&
+						(publisher.isEmpty() || temp.publisher.equals(b.publisher)) &&
+						(year.isEmpty() || temp.year.equals(b.year))
+						) {
+					books.add(temp);
+				}
+
+				if (books.size() > 0) {
+					for (int i = 0; i < books.size(); i++) {
+						entriesFound += books.get(i).toString(); 
+
 					}
 				}
+				output.println(entriesFound); 
 
 
 			}catch (Exception printErr) {
