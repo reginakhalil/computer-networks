@@ -130,6 +130,29 @@ public class Server {
 			public String getYear() {
 				return this.year;
 			}
+
+					/*
+			 * Setters 
+			 */
+			public void setISBN(String isbn) {
+				this.isbn = isbn; 
+			}
+			
+			public void setTitle(String title) {
+				this.title = title;
+			}
+			
+			public void setAuthor(String author) {
+				this.author = author;
+			}
+			
+			public void setPub(String pub) {
+				this.publisher = pub;
+			}
+			
+			public void setYear(String year) {
+				this.year = year;
+			}
 			
 			public String bibFormat(String entries) {
 				String citekey = this.author + this.year;
@@ -206,21 +229,67 @@ public class Server {
 			String year;
 			String publisher;
 			
-			String found = "Bibliographies found: ";
-			//NEED THIS 
-			// basically whatever isnt null, compare with like allEntries.get(i).getTitle or something, flush whatever matches
-			// similar to the getAll
+			/* NEED THIS 
+			 * basically whatever isnt null, compare with like allEntries.get(i).getTitle or something, flush whatever matches
+			 * similar to the getAll
+			 * ArrList:
+			 * [req, all, bibtex, isbn, title, author, yr, publisher]
+			 */ 
+
+			try {
+				output = new PrintWriter(s.getOutputStream(), true); 
+				String entriesFound = "Bibliographies found: ";
+				
+				for (i=0; i < allEntries.size(); i++) {
+
+					if allEntries[i] == entry{
+						entriesFound = entriesFound + "\n" + entry;
+					}
+				}
+
+
+			}catch (Exception printErr) {
+				// perhaps this can be a joptionpane window.
+				output.println("Cannot print entries");
+			}
 		}
 		
 		public void updateEntry(ArrayList <String> entry, PrintWriter output) {
-			String isbn;
-			String title;
-			String author;
-			String year;
-			String publisher;
+			String isbn = entry.getISBN();
+			String title = entry.getTitle();
+			String author = entry.getAuthor();
+			String year = entry.getYear(); 
+			String publisher = entry.getPub();
 			
+
 			//NEED THIS
 			// basically whatever isnt null, compare with like allEntries.get(i).getTitle or something, update whatever matches and flush
+			try {
+				output = new PrintWriter(s.getOutputStream(), true); 
+				for (int i = 0; i < allEntries.size(); i++) {
+					if (allentries.get(i).getISBN() == isbn) {
+						if (title != null) {
+							allEntries.get(i).setTitle(title); 
+						}
+						if (author != null) {
+							allEntries.get(i).setAuthor(author); 
+						}
+						if (year != null) {
+							allEntries.get(i).setYear(year); 
+						}
+						if (publisher != null) {
+							allEntries.get(i).setPub(publisher); 
+						}
+					}
+			}
+				output.println("Updated succefully");
+				output.flush();	
+			} catch (Exception printErr) {
+				// perhaps this can be a joptionpane window.
+				output.println("Cannot print entries");
+			}
+
+			}
 		}
 		
 		public void removeAll(PrintWriter output) {
@@ -238,6 +307,7 @@ public class Server {
 				output.println("Could not clear all entries");
 			}
 		}
+
 		
 		@Override
 		public void run() {
