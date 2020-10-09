@@ -1,3 +1,4 @@
+
 import java.net.*;
 import java.awt.*;
 import javax.swing.*;
@@ -248,32 +249,41 @@ public class Client extends JFrame {
 				 * Array list of book entry to be sent
 				 */
 				ArrayList<String> entry = new ArrayList<String>();
+				String type = (String) dropBox.getSelectedItem();
+				String Isbn;
+				String book_title;
+				String book_auth;
+				String book_pub;
+				String book_year;
+				boolean allState = all.isSelected();
+				boolean bibtexState = bibtex.isSelected();
 				
 				try {
-					String type = (String) dropBox.getSelectedItem();
-					String Isbn = isbn.getText(); 
-					String book_title = title.getText(); 
-					String book_auth = author.getText();
-					String book_pub = publisher.getText();
-					String book_year = year.getText();
-					boolean allState = all.isSelected();
-					boolean bibtexState = bibtex.isSelected();
 					
 					/*
 					 *  if statements to check if they fields are empty before sending data
 					 */
+					Isbn =  isbn.getText();
 					if (Isbn.isEmpty()) {
 						Isbn = null;
 					}
 					
+					book_title = title.getText();
 					if (book_title.isEmpty()) {
 						book_title = null;
 					}
 					
+					book_auth = author.getText();
 					if (book_auth.isEmpty()) {
 						book_auth = null;
 					}
 					
+					book_pub = publisher.getText();
+					if (book_pub.isEmpty()) {
+						book_pub = null;
+					}
+						
+					book_year = year.getText();
 					if (book_year.isEmpty()) {
 						book_year = null;
 					}
@@ -288,15 +298,17 @@ public class Client extends JFrame {
 					 */
 					if (Isbn != null || book_title != null || book_auth != null || book_year != null || book_year != null) {
 						entry.add(type);
+						entry.add(String.valueOf(allState));
+						entry.add(String.valueOf(bibtexState));
 						entry.add(Isbn);
 						entry.add(book_title);
 						entry.add(book_auth);
 						entry.add(book_pub);
 						entry.add(book_year);
-						entry.add(String.valueOf(allState));
-						entry.add(String.valueOf(bibtexState));
+					}
+					
+					if (entry.size() > 0) {
 						sending = 1;
-						
 					}
 					
 					/*
@@ -304,12 +316,19 @@ public class Client extends JFrame {
 					 */
 					if (sending == 1) {
 						try {
-							ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-							output.writeObject(entry);
-							input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-							String re = input.readLine();
-							serverTextArea.setText(re);
-								
+							DataInputStream din=new DataInputStream(socket.getInputStream());  
+							DataOutputStream dout=new DataOutputStream(socket.getOutputStream());  
+							BufferedReader br=new BufferedReader(new InputStreamReader(System.in)); 
+							
+							JOptionPane.showMessageDialog(null, "SEND SUCCESS", null, JOptionPane.DEFAULT_OPTION);
+							
+							String client =br.readLine();  
+							dout.writeUTF(client);  
+							dout.flush();  
+							String server =din.readUTF();  
+							
+							dout.close();  
+							socket.close();  
 						} catch (Exception e1) {
 							JOptionPane.showMessageDialog(null, "Cannot send to server", null, JOptionPane.ERROR_MESSAGE);
 						}
