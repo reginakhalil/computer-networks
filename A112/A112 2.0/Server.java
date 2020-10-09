@@ -4,7 +4,6 @@ import java.util.*;
 
 import javax.swing.JOptionPane;
 
-import java.awt.print.Book;
 import java.io.*;
 
 @SuppressWarnings("unchecked")
@@ -107,6 +106,29 @@ public class Server {
 				this.publisher = publisher;
 
 			}
+			/*
+			 * Setters
+			 */
+			
+			public void setISBN(String isbn) {
+				isbn = this.isbn; 
+			}
+			
+			public void setTitle(String title) {
+				title = this.title; 
+			}
+			
+			public void setAuthor(String author) {
+				author = this.author; 
+			}
+			
+			public void setPub(String pub) {
+				pub = this.publisher; 
+			}
+			
+			public void setYear(String year) {
+				year = this.year; 
+			}
 			
 			/*
 			 * Getters 
@@ -130,57 +152,13 @@ public class Server {
 			public String getYear() {
 				return this.year;
 			}
-
-					/*
-			 * Setters 
-			 */
-			public void setISBN(String isbn) {
-				this.isbn = isbn; 
-			}
-			
-			public void setTitle(String title) {
-				this.title = title;
-			}
-			
-			public void setAuthor(String author) {
-				this.author = author;
-			}
-			
-			public void setPub(String pub) {
-				this.publisher = pub;
-			}
-			
-			public void setYear(String year) {
-				this.year = year;
-			}
 			
 			public String bibFormat(String entries) {
 				String citekey = this.author + this.year;
 				String bibtex = "@BOOK{" + citekey + ",\n@title = " + getTitle() + "\nauthor = " + getAuthor() + "\npublisher = " + getPub() + "\nyear = " + getYear(); 
 				return bibtex;	
 				}
-
-			public String toString() {
-				this.request = " ";
-				if(this.isbn != "") {
-					this.request = this.request + "ISBN" + " "+ this.isbn;
-				}
-				if(this.title != "") {
-					this.request = this.request + "TITLE" + " "+ this.title;
-				}
-				if(this.author != "") {
-					this.request = this.request + "AUTHOR" + " "+ this.author;
-				}
-				if(this.publisher != "") {
-					this.request = this.request + "PUBLISHER" + " "+ this.publisher;
-				}
-				if(this.year != "") {
-					this.request = this.request + "YEAR" + " "+ this.year;
-				}
-				System.out.println(this.request);
-				return this.request;
 			}
-		}
 		
 		public void createEntry (ArrayList <String> entry, PrintWriter output) {
 			/* 
@@ -244,66 +222,69 @@ public class Server {
 		}
 		
 		public void getEntry (ArrayList <String> entry, PrintWriter output) {
-			String isbn = entry.getISBN();
-			String title = entry.getTitle();
-			String author = entry.getAuthor();
-			String year = entry.getYear(); 
-			String publisher = entry.getPub();
-			
-			/* NEED THIS 
+			/* gets specific entries 
 			 * basically whatever isnt null, compare with like allEntries.get(i).getTitle or something, flush whatever matches
 			 * similar to the getAll
 			 * ArrList:
 			 * [req, all, bibtex, isbn, title, author, yr, publisher]
 			 */ 
-			ArrayList<Book> books = new ArrayList<Book>();
-
+			String isbn = String.valueOf(entry.get(3));
+			String title = String.valueOf(entry.get(4));
+			String author = String.valueOf(entry.get(5));
+			String year = String.valueOf(entry.get(6));
+			String publisher = String.valueOf(entry.get(7));
+			
+			ArrayList<Books> Requests = new ArrayList<Books>();
+			
 			try {
 				output = new PrintWriter(s.getOutputStream(), true); 
 				String entriesFound = "Bibliographies found: ";
-				
-
-				for (i=0; i < allEntries.size(); i++) {
-					Book temp = allEntries.get(i); 
+				for (int i =0; i < allEntries.size(); i++) {
+					Books temp = allEntries.get(i); 
 					if(
-						(isbn.isEmpty() || temp.isbn.equals(b.isbn)) &&
-						(title.isEmpty() || temp.title.equals(b.title)) &&
-						(author.isEmpty() || temp.author.equals(b.author)) &&
-						(publisher.isEmpty() || temp.publisher.equals(b.publisher)) &&
-						(year.isEmpty() || temp.year.equals(b.year))
+						(isbn.isEmpty() || temp.getISBN().equals(isbn)) &&
+						(title.isEmpty() || temp.getTitle().equals(title)) &&
+						(author.isEmpty() || temp.getAuthor().equals(author)) &&
+						(publisher.isEmpty() || temp.getPub().equals(publisher)) &&
+						(year.isEmpty() || temp.getYear().equals(year))
 						) {
-					books.add(temp);
-				}
-
-				if (books.size() > 0) {
-					for (int i = 0; i < books.size(); i++) {
-						entriesFound += books.get(i).toString(); 
-
+					Requests.add(temp);
+					}
+				
+				if (Requests.size() > 0) {
+						for (int j = 0; j < Requests.size(); j++) {
+							entriesFound += Requests.get(j).toString(); 
+							
+							if (allEntries.contains(temp)) {
+								entriesFound = entriesFound + "\n" + entry;
+							}
 					}
 				}
-				output.println(entriesFound); 
-
-
-			}catch (Exception printErr) {
-				// perhaps this can be a joptionpane window.
-				output.println("Cannot print entries");
 			}
-		}
+			output.println("Entry found");
+			output.flush();	
+
+			} catch (Exception noEntry) {
+				output.println("Cannot print entries");
+				output.flush();	
+			}
+			
+			
+	}
 		
 		public void updateEntry(ArrayList <String> entry, PrintWriter output) {
-			String isbn = entry.getISBN();
-			String title = entry.getTitle();
-			String author = entry.getAuthor();
-			String year = entry.getYear(); 
-			String publisher = entry.getPub();
+			String isbn = String.valueOf(entry.get(3));
+			String title = String.valueOf(entry.get(4));
+			String author = String.valueOf(entry.get(5));
+			String year = String.valueOf(entry.get(6));
+			String publisher = String.valueOf(entry.get(7));
 			
-
 			//NEED THIS
 			// basically whatever isnt null, compare with like allEntries.get(i).getTitle or something, update whatever matches and flush
 			try {
 				output = new PrintWriter(s.getOutputStream(), true); 
 				for (int i = 0; i < allEntries.size(); i++) {
-					if (allentries.get(i).getISBN() == isbn) {
+					if (allEntries.get(i).getISBN() == isbn) {
 						if (title != null) {
 							allEntries.get(i).setTitle(title); 
 						}
@@ -319,14 +300,12 @@ public class Server {
 					}
 			}
 				output.println("Updated succefully");
-				output.flush();	
+				
 			} catch (Exception printErr) {
-				// perhaps this can be a joptionpane window.
 				output.println("Cannot print entries");
 			}
-
-			}
-		}
+			output.flush();	
+	}
 		
 		public void removeAll(PrintWriter output) {
 			try {
@@ -343,7 +322,6 @@ public class Server {
 				output.println("Could not clear all entries");
 			}
 		}
-
 		
 		@Override
 		public void run() {
