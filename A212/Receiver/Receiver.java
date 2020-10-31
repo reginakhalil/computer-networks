@@ -1,6 +1,8 @@
 import javax.swing.*; 
 import java.awt.*; 
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.*;
 
@@ -11,6 +13,10 @@ import java.net.*;
 @SuppressWarnings("serial")
 public class Receiver extends JFrame
 {
+	private static String fileName = "";
+    private static String decodedDataUsingUTF82 = null;
+    private static int total = 0;
+    
 	public static void main(String[] args) {
 		new Receiver();
 	}
@@ -19,9 +25,150 @@ public class Receiver extends JFrame
 * This is where functions involving the transfer is created to be used with
 * the GUI below
 */
+	public static int initSend (int rport, InetAddress address, int sport, String file, boolean rdtBool) throws IOException {
+		DatagramSocket rsocket = new DatagramSocket(rport);
+		byte[] receiveFile = new byte[1024];
+		DatagramPacket filePckt = new DatagramPacket(receiveFile, receiveFile.length);
+		rsocket.receive(filePckt);
+		
+		try {
+            decodedDataUsingUTF82 = new String(receiveFile, "UTF-8");
+        } catch (Exception unsupportedFile) {
+        	unsupportedFile.printStackTrace();
+        }
+		
+		setFileName(file);
+		File fileExport = new File (file);
+		FileOutputStream outFile = new FileOutputStream(fileExport);
+		
+		if (rdtBool) {
+			total = rdt(outFile, rsocket, sport, address);
+		} else {
+			total = udt(outFile, rsocket, sport, address);
+		}
+		
+		
+		return total;
+	}
+	
+	private static int udt(FileOutputStream outFile, DatagramSocket ssocket, int port, InetAddress address) throws IOException {
+		// flag to receive the final pckt
+			boolean flag;
+			int seqNum = 0;
+			int last = 0;
+			
+			while (true) {
+				byte[] msg = new byte [1024];
+				byte [] fileArr = new byte [1021];
+				
+				// receive pckt and msg
+				DatagramPacket rcvd = new DatagramPacket(msg, msg.length);
+				
+				// if it is a multiple of 10, we will drop
+				if ((rcvd.getLength()%10) != 0) {
+					ssocket.receive(rcvd);
+				}
+				//get pckt data
+				msg = rcvd.getData();
+				
+				total = rcvd.getLength() + total;
+				
+				//get seqNum
+				seqNum = ((msg[0] & 0xff) << 8) + (msg[1] & 0xff);
+				
+				/* getting flag for last msg 
+				 * -> if true, something's wrong
+				 */
+				flag = (msg[2] & 0xff) == 1;
+				
+				/*
+				 * checking if seqNum is last val + 1 (correct)
+				 * gotta get data and write it if correct
+				 */
+				if (seqNum == (last+1)) {
+					last = seqNum;
+					System.arraycopy(msg, 3, fileArr, 0, 1021);
+					
+					// write to file
+					sendACK(last, ssocket, address, port);
+				}
+				
+				// checking last msg
+				if (flag) {
+					outFile.close();
+					break;
+				}
+				
+			}	
+			return total;
+	}
 
 
 	
+	private static int rdt(FileOutputStream outFile, DatagramSocket ssocket, int port, InetAddress address) throws IOException {
+	// flag to receive the final pckt
+		boolean flag;
+		int seqNum = 0;
+		int last = 0;
+		
+		while (true) {
+			byte[] msg = new byte [1024];
+			byte [] fileArr = new byte [1021];
+			
+			// receive pckt and msg
+			DatagramPacket rcvd = new DatagramPacket(msg, msg.length);
+			ssocket.receive(rcvd);
+			//get pckt data
+			msg = rcvd.getData();
+			
+			total = rcvd.getLength() + total;
+			
+			//get seqNum
+			seqNum = ((msg[0] & 0xff) << 8) + (msg[1] & 0xff);
+			
+			/* getting flag for last msg 
+			 * -> if true, something's wrong
+			 */
+			flag = (msg[2] & 0xff) == 1;
+			
+			/*
+			 * checking if seqNum is last val + 1 (correct)
+			 * gotta get data and write it if correct
+			 */
+			if (seqNum == (last+1)) {
+				last = seqNum;
+				System.arraycopy(msg, 3, fileArr, 0, 1021);
+				
+				// write to file
+				sendACK(last, ssocket, address, port);
+			}
+			
+			// checking last msg
+			if (flag) {
+				outFile.close();
+				break;
+			}
+			
+		}	
+		return total;
+	}
+
+	private static void sendACK(int last, DatagramSocket ssocket, InetAddress address, int port) throws IOException {
+		byte[] ack = new byte[2];
+		ack[0] = (byte) (last >> 8);
+		ack[1] = (byte) (last);
+		
+		//sending
+		DatagramPacket ackPckt = new DatagramPacket(ack, ack.length, address, port);
+        ssocket.send(ackPckt);
+		
+	}
+
+	
+	private static void setFileName(String file) {
+		fileName = file;
+	}
+
 /* -------------------------------- GUI --------------------------------
  * This is where GUI init and ActionListeners are created
  */
@@ -166,28 +313,40 @@ public class Receiver extends JFrame
 		 * The "Receive" Button 
 		 * 
 		 */
-        recieved.addActionListener(new ActionListener() {
+        recieved.addActionListener(new ActionListener()  {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				String sendText = sender_udp_text.getText();
 				String host = host_text.getText();
-				String sender = sender_udp_text.getText();
-				String receiver = reciever_udp_text.getText();
+				int sender = Integer.parseInt(sender_udp_text.getText());
+				String recText = reciever_udp_text.getText();
+				int receiver = Integer.parseInt(reciever_udp_text.getText());
 				String file = file_text.getText();
 				boolean unreliable = urdt.isSelected();
 				boolean reliable = rdt.isSelected();
-				int seqNum;
-				if (host.equals("") || sender.equals("") || receiver.equals("") || file.equals("") && reliable == false && unreliable == false) {
+				InetAddress ip = null;
+				try {
+					ip = InetAddress.getByName(host);
+				} catch (UnknownHostException e1) {
+					e1.printStackTrace();
+				}
+	
+				if (host.equals("") || sendText.equals("") || recText.equals("") || file.equals("") && reliable == false && unreliable == false) {
 					JOptionPane.showMessageDialog(null, "Empty field(s) detected", null, JOptionPane.ERROR_MESSAGE);
-				} else if (unreliable == true && reliable == false) {
-					
-				} else if (reliable == true && unreliable == false){
-					
+				} else if ((unreliable == true && reliable == false)|| (reliable == true && unreliable == false)) {
+					try {
+						total = initSend(receiver, ip, sender, file, reliable);
+						recieved_pckts_text.setText(Integer.toString(total));
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+
 				} else {
 					JOptionPane.showMessageDialog(null, "Must select only one UDP transfer option", null, JOptionPane.ERROR_MESSAGE);
 				}
 				
 			}
-	    });
+	    } );
 
 	
 	}
