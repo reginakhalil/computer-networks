@@ -43,8 +43,14 @@ public class Receiver extends JFrame
 		
 		if (rdtBool) {
 			total = rdt(outFile, rsocket, sport, address);
+			byte [] finalData = new byte[1024];
+			DatagramPacket rcvd = new DatagramPacket (finalData, finalData.length);
+			rsocket.receive(rcvd);
 		} else {
 			total = udt(outFile, rsocket, sport, address);
+			byte [] finalData = new byte[1024];
+			DatagramPacket rcvd = new DatagramPacket (finalData, finalData.length);
+			rsocket.receive(rcvd);
 		}
 		
 		
@@ -329,7 +335,7 @@ public class Receiver extends JFrame
 					e1.printStackTrace();
 				}
 	
-				if (host.equals("") || sendText.equals("") || recText.equals("") || file.equals("") && reliable == false && unreliable == false) {
+				if (host.equals("") || sendText.equals("") || recText.equals("") || file.equals("") || (reliable == false && unreliable == false)) {
 					JOptionPane.showMessageDialog(null, "Empty field(s) detected", null, JOptionPane.ERROR_MESSAGE);
 				} else if ((unreliable == true && reliable == false)|| (reliable == true && unreliable == false)) {
 					int sender = Integer.parseInt(sender_udp_text.getText());
@@ -348,7 +354,6 @@ public class Receiver extends JFrame
 			}
 	    } );
 
-	
 	}
 
 }
