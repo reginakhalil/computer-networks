@@ -71,13 +71,28 @@ public class Receiver extends JFrame
 				DatagramPacket rcvd = new DatagramPacket(msg, msg.length);
 				
 				// if it is a multiple of 10, we will drop
-				if ((rcvd.getLength()%10) != 0) {
-					ssocket.receive(rcvd);
-				}
+				ssocket.receive(rcvd);
+			
 				//get pckt data
 				msg = rcvd.getData();
 				
-				total = rcvd.getLength() + total;
+				/*
+				 * here, we are getting the temporary # of total packets
+				 * we then will do a for and loop thru and do a counter 
+				 * when we encounter a pckt whose seqNum is a multiple of 10
+				 * then, we will subtract total packets from that,
+				 * to simulate every 10th packet being dropped.
+				 */
+				int total1 = 0;
+				total1 = rcvd.getLength() + total1;
+				int drop = 0;
+				for (int i = 0; i < total1; i++) {
+					if (i%10==0) {
+						drop++;
+					}
+				}
+				
+				total = rcvd.getLength()-drop;
 				
 				//get seqNum
 				seqNum = ((msg[0] & 0xff) << 8) + (msg[1] & 0xff);
