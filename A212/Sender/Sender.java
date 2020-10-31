@@ -141,7 +141,8 @@ public class Sender {
 			}
 			
 			int total = totalPackets(sendPacket);
-			System.out.println("Total Packets Sent: " + total);		
+			int time = timer(sendPacket);
+			System.out.println("Total Packets Sent: " + total + "\nTime (ms): " + time);		
  		}
 	}
 	
@@ -166,4 +167,17 @@ public class Sender {
 	     return total;
 	    }
 	 
+	 
+	 private static int timer (DatagramPacket packet) {
+		 int count = 0;
+	     for (;;) {
+	    	 try {
+	    		 Thread.sleep(1);
+	    		 count++;
+	    	 } catch (InterruptedException e) {
+	    		 e.printStackTrace();
+	    	 }	    	 
+	    return count;
+	     }
+	  }
 }
