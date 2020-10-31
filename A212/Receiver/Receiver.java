@@ -318,9 +318,7 @@ public class Receiver extends JFrame
 			public void actionPerformed(ActionEvent e) {
 				String sendText = sender_udp_text.getText();
 				String host = host_text.getText();
-				int sender = Integer.parseInt(sender_udp_text.getText());
 				String recText = reciever_udp_text.getText();
-				int receiver = Integer.parseInt(reciever_udp_text.getText());
 				String file = file_text.getText();
 				boolean unreliable = urdt.isSelected();
 				boolean reliable = rdt.isSelected();
@@ -334,6 +332,8 @@ public class Receiver extends JFrame
 				if (host.equals("") || sendText.equals("") || recText.equals("") || file.equals("") && reliable == false && unreliable == false) {
 					JOptionPane.showMessageDialog(null, "Empty field(s) detected", null, JOptionPane.ERROR_MESSAGE);
 				} else if ((unreliable == true && reliable == false)|| (reliable == true && unreliable == false)) {
+					int sender = Integer.parseInt(sender_udp_text.getText());
+					int receiver = Integer.parseInt(reciever_udp_text.getText());
 					try {
 						total = initSend(receiver, ip, sender, file, reliable);
 						recieved_pckts_text.setText(Integer.toString(total));
