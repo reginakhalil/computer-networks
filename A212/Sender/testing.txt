@@ -1,0 +1,10 @@
+From application dev’s view, the network architecture is fixed and provides specific set of services to applications
+Application architecture: designed by application dev and dictates how the application is structured over various end systems
+Two paradigms used in modern network applications:
+Client-server architecture
+Peer to peer (P2P) architecture
+Client-server architecture: there’s an always-on host, called the server, which services requests from other hosts, clients
+Some examples include the Web, FTP, Telnet, and email
+Often, single-server host is incapable of keeping up with all client requests
+For this reason, a data center (houses a large number of hosts) is often used to create a powerful virtual server
+EOF
