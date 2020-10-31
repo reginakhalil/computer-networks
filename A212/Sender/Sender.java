@@ -1,7 +1,5 @@
 import java.io.*;
 import java.net.*;
-import java.util.Timer;
-import java.util.TimerTask;
 
 
 public class Sender {
@@ -13,7 +11,6 @@ public class Sender {
 	public static int maxData; //max data inside datagram in bytes
 	public static int timeout; // timeout in ms
 	public static String dataDecoding = null;
-	public static Timer timer;
 	
 	public static void main(String[] args) throws Exception {
 		/*
@@ -28,7 +25,7 @@ public class Sender {
 		file = args[3];
 		maxData = Integer.parseInt(args[4]);
 		timeout = Integer.parseInt(args[5]);
-		initSend(recPort, IPaddr, file, maxData, timeout);
+		initSend(recPort, IPaddr, file, maxData, timeout, sendPort);
 		
 	}
 	
@@ -37,8 +34,8 @@ public class Sender {
 	 * creats a datagrapm packet to send and receive. 
 	 * The sending and receiving of the acks will be in the Receiver class
 	 */
-	public static void initSend (int rport, String ipAddr, String file, int mds, int timeout) throws IOException {
-		DatagramSocket ssocket = new DatagramSocket();
+	public static void initSend (int rport, String ipAddr, String file, int mds, int timeout, int sport) throws IOException {
+		DatagramSocket ssocket = new DatagramSocket(sport);
 		InetAddress ip = InetAddress.getByName(ipAddr);
 		String newFile = "received.txt";
 		byte[] newFileData = newFile.getBytes();
@@ -51,13 +48,13 @@ public class Sender {
 		 * here is the sending of the file 
 		 * and sending the EOT datagram
 		 */
-		rdt(ssocket, fileArr, ip, mds, rport, timeout);
+		sendData(ssocket, fileArr, ip, mds, rport, timeout);
 		sendEOT(ssocket, ip, rport);
 		ssocket.close();
 		
 	}
 
-	private static void rdt(DatagramSocket socket, byte[] fileArr, InetAddress ip, int mds, int rport, int timeout) throws IOException {
+	private static void sendData(DatagramSocket socket, byte[] fileArr, InetAddress ip, int mds, int rport, int timeout) throws IOException {
 		int seqNum = 0;
 		boolean flag;
 		int ackSeq = 0;
@@ -91,107 +88,17 @@ public class Sender {
 			if (!flag) {
 				System.arraycopy(fileArr, i, msg, 3, 1021);
 			} else {
-				System.arraycopy(fileArr, i, msg, 3, fileArr.length-1);
+				System.arraycopy(fileArr, i, msg, 3, fileArr.length-i);
 			}
 			
 			//pckt sending
 			DatagramPacket sendPacket = new DatagramPacket(msg, msg.length, ip, rport);
 			
-			socket.send(sendPacket);
-			
-			// ack? yes or no
-			boolean ackYN;
-			
-			while (true) {
-				// byte arr of len 3 for the ack
-				byte[] ack = new byte[2];
-				DatagramPacket ackPckt = new DatagramPacket(ack, ack.length);
-				
-				/*
-				 * this is where we attempt to ack the packet 
-				 * we also use the timeout val given to us here
-				 */
-				try {
-					socket.setSoTimeout(timeout);
-					socket.receive(ackPckt);
-					// 0xFF  is used to make an operation between byte and int work
-					// kinda like typecasting
-					ackSeq = ((ack[0] & 0xff) << 8) + (ack[1] & 0xff);
-					ackYN = true;
-				} catch (SocketTimeoutException e) {
-					System.out.println("Socket timed out waiting for packet");
-					ackYN = false;		
-				}
-				
-				/*
-				 * pckt has been successfully send
-				 * break is to mov onto the next pckt
-				 * else retransmit (this is for
-				 */
-				if ((ackSeq == seqNum) && (ackYN)) {
-					System.out.println("ACK received of Sequence #: " + ackSeq);
-					break;
-				}
-				else {
-					socket.send(sendPacket);
-					System.out.println("Resending Sequence # " + seqNum);
-				}
-				
-			}
-			int total = totalPackets(sendPacket);
-			System.out.println("Total Packets Sent: " + total);		
- 		}
-	}
-	
-	private static void udt(DatagramSocket socket, byte[] fileArr, InetAddress ip, int mds, int rport, int timeout) throws IOException {
-		int seqNum = 0;
-		boolean flag;
-		int ackSeq = 0;
-		// 2 bytes for msgs; since les than 1024 (1023) it will be 1021 + 2 so the first 2 bytes are for the msg seqNum
-		for (int i = 0; i < fileArr.length; i+= 1021) {
-			seqNum += 1;
-			/*
-			 * creating msg with the given MDS
-			 * seqNum >> is for a right shift of 2 of the 8 bits from the msg being sent (2 seq# for each msg)
-			 * the if statement is if the size is greater or equal to file len, meaning it has sent, so seq# of 1
-			 * else it's not all sent, so seq# of 0
-			 */
-			byte[] msg = new byte[mds];
-			msg[0] = (byte) (seqNum >> 8); 
-			msg[1] = (byte) (seqNum); 
-			
-			if ((i + 1021) >= fileArr.length) {
-				flag = true;
-				msg[2] = (byte) (1);
-			} else {
-				flag = false;
-				msg[2] = (byte) (0);
-			}
-			
-			/*
-			 *  is it the last msg or not? if not, do the first
-			 *  else do the second one
-			 *  dest pos of 3 cuz for msg2
-			 */
-			
-			if (!flag) {
-				System.arraycopy(fileArr, i, msg, 3, 1021);
-			} else {
-				System.arraycopy(fileArr, i, msg, 3, fileArr.length-1);
-			}
-			
-			//pckt sending
-			DatagramPacket sendPacket = new DatagramPacket(msg, msg.length, ip, rport);
-			
-			/*
-			 * udt: every 10th pckt is dropped.
-			 * so if it's not divisble by 10, we can send
-			 * we're going by the assumption seqNum is the pckt #
-			 * ex. seqNum 4 == pckt #4
-			 */
-			if (seqNum%10 !=0) {
+			if (i != 0) {
 				socket.send(sendPacket);
+				System.out.println("Sent: Sequence number = " + seqNum);
 			}
+			
 			// ack? yes or no
 			boolean ackYN;
 			
@@ -212,13 +119,13 @@ public class Sender {
 					ackSeq = ((ack[0] & 0xff) << 8) + (ack[1] & 0xff);
 					ackYN = true;
 				} catch (SocketTimeoutException e) {
-					System.out.println("Socket timed out waiting for packet");
+					System.out.println("Socket timed out waiting for packet: " + seqNum);
 					ackYN = false;		
 				}
 				
 				/*
 				 * pckt has been successfully send
-				 * break is to mov onto the next pckt
+				 * break is to move onto the next pckt
 				 * else retransmit (this is for
 				 */
 				if ((ackSeq == seqNum) && (ackYN)) {
@@ -228,9 +135,11 @@ public class Sender {
 				else {
 					socket.send(sendPacket);
 					System.out.println("Resending Sequence # " + seqNum);
+					break;
 				}
 				
 			}
+			
 			int total = totalPackets(sendPacket);
 			System.out.println("Total Packets Sent: " + total);		
  		}
@@ -256,4 +165,5 @@ public class Sender {
 
 	     return total;
 	    }
+	 
 }
