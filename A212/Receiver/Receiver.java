@@ -72,6 +72,7 @@ public class Receiver extends JFrame
 				
 				// if it is a multiple of 10, we will drop
 				ssocket.receive(rcvd);
+				total++;
 			
 				//get pckt data
 				msg = rcvd.getData();
@@ -83,16 +84,14 @@ public class Receiver extends JFrame
 				 * then, we will subtract total packets from that,
 				 * to simulate every 10th packet being dropped.
 				 */
-				int total1 = 0;
-				total1 = rcvd.getLength() + total1;
 				int drop = 0;
-				for (int i = 0; i < total1; i++) {
+				for (int i = 1; i < total; i++) {
 					if (i%10==0) {
 						drop++;
 					}
 				}
 				
-				total = rcvd.getLength()-drop;
+				total = total-drop;
 				
 				//get seqNum
 				seqNum = ((msg[0] & 0xff) << 8) + (msg[1] & 0xff);
@@ -142,7 +141,7 @@ public class Receiver extends JFrame
 			//get pckt data
 			msg = rcvd.getData();
 			
-			total = rcvd.getLength() + total;
+			total++;
 			
 			//get seqNum
 			seqNum = ((msg[0] & 0xff) << 8) + (msg[1] & 0xff);
