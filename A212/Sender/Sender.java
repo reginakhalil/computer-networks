@@ -93,9 +93,10 @@ public class Sender {
 			
 			//pckt sending
 			DatagramPacket sendPacket = new DatagramPacket(msg, msg.length, ip, rport);
-			
+			int packetsTotal = 0;
 			if (i != 0) {
 				socket.send(sendPacket);
+				packetsTotal++;
 				System.out.println("Sent: Sequence number = " + seqNum);
 			}
 			
@@ -140,9 +141,8 @@ public class Sender {
 				
 			}
 			
-			int total = totalPackets(sendPacket);
 			int time = timer(sendPacket);
-			System.out.println("Total Packets Sent: " + total + "\nTime (ms): " + time);		
+			System.out.println("Total Packets Sent: " + packetsTotal + "\nTime (ms): " + time);		
  		}
 	}
 	
@@ -158,14 +158,7 @@ public class Sender {
 			System.out.println("Unable to trasnfer EOT");
 		}
 	}
-	
-	 private static int totalPackets (DatagramPacket packet) {
-		 int total = 0;
-	     total = packet.getLength() + total;
-	     total = Math.round(total);
 
-	     return total;
-	    }
 	 
 	 
 	 private static int timer (DatagramPacket packet) {
