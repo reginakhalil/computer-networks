@@ -1,6 +1,6 @@
 import java.io.*;
 import java.net.*;
-
+import javax.swing.*;
 
 public class Sender {
 
@@ -12,6 +12,7 @@ public class Sender {
 	public static int timeout; // timeout in ms
 	public static String dataDecoding = null;
 	
+
 	public static void main(String[] args) throws Exception {
 		/*
 		 * initializing vars and setting up sockets for file transfer.
@@ -26,9 +27,11 @@ public class Sender {
 		maxData = Integer.parseInt(args[4]);
 		timeout = Integer.parseInt(args[5]);
 		initSend(recPort, IPaddr, file, maxData, timeout, sendPort);
-		
+
+	
 	}
 	
+
 	/*
 	 * function initializes the sending of the file given the 2 ports and 
 	 * creats a datagrapm packet to send and receive. 
@@ -48,6 +51,7 @@ public class Sender {
 		 * here is the sending of the file 
 		 * and sending the EOT datagram
 		 */
+		
 		sendData(ssocket, fileArr, ip, mds, rport, timeout);
 		sendEOT(ssocket, ip, rport);
 		ssocket.close();
@@ -59,6 +63,9 @@ public class Sender {
 		boolean flag;
 		int ackSeq = 0;
 		// 2 bytes for msgs; since les than 1024 (1023) it will be 1021 + 2 so the first 2 bytes are for the msg seqNum
+		
+		Timer t = new Timer();
+		t.reset();
 		for (int i = 0; i < fileArr.length; i+= 1021) {
 			seqNum += 1;
 			/*
@@ -140,9 +147,8 @@ public class Sender {
 				}
 				
 			}
-			
-			int time = timer(sendPacket);
-			System.out.println("Total Packets Sent: " + packetsTotal + "\nTime (ms): " + time);		
+			t.time(Timer.Kind.A);
+			System.out.println("Total Packets Sent: " + packetsTotal + "\nTime (ms): " + t.toString());		
  		}
 	}
 	
@@ -157,20 +163,34 @@ public class Sender {
 		} catch (IOException EOTransfer) {
 			System.out.println("Unable to trasnfer EOT");
 		}
+	}	 
+	 
+}
+
+class Timer {
+	enum Kind { A;}
+	long[] times = new long[Kind.values().length];
+	private long baseTime;
+
+	public void reset() {
+		baseTime = System.currentTimeMillis();
 	}
 
-	 
-	 
-	 private static int timer (DatagramPacket packet) {
-		 int count = 0;
-	     for (;;) {
-	    	 try {
-	    		 Thread.sleep(1);
-	    		 count++;
-	    	 } catch (InterruptedException e) {
-	    		 e.printStackTrace();
-	    	 }	    	 
-	    return count;
-	     }
-	  }
+	public void time(Kind kind) {
+		long current = System.currentTimeMillis();
+		times[kind.ordinal()] += (current - baseTime);
+		baseTime = current;
+	}
+
+	public String toString() {
+		StringBuffer buff = new StringBuffer();
+		String sep = "";
+		for (int i = 0; i < times.length; i++) {
+			buff.append(sep);
+			sep = ",";
+			buff.append(times[i]);
+		}
+		buff.append("ms");
+		return buff.toString();
+	}
 }
