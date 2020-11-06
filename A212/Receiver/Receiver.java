@@ -43,12 +43,12 @@ public class Receiver extends JFrame
 		
 		if (rdtBool) {
 			total = rdt(outFile, rsocket, sport, address);
-			byte [] finalData = new byte[1024];
+			byte [] finalData = new byte[100];
 			DatagramPacket rcvd = new DatagramPacket (finalData, finalData.length);
 			rsocket.receive(rcvd);
 		} else {
 			total = udt(outFile, rsocket, sport, address);
-			byte [] finalData = new byte[1024];
+			byte [] finalData = new byte[100];
 			DatagramPacket rcvd = new DatagramPacket (finalData, finalData.length);
 			rsocket.receive(rcvd);
 		}
