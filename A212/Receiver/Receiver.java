@@ -133,8 +133,8 @@ public class Receiver extends JFrame
 		int last = 0;
 		
 		while (true) {
-			byte[] msg = new byte [mds];
-			byte [] fileArr = new byte [(mds-3)];
+			byte[] msg = new byte [1024];
+			byte [] fileArr = new byte [1021];
 			
 			// receive pckt and msg
 			DatagramPacket rcvd = new DatagramPacket(msg, msg.length);
