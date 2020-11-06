@@ -16,10 +16,11 @@ public class Receiver extends JFrame
 	private static String fileName = "";
     private static String decodedDataUsingUTF82 = null;
     private static int total = 0;
-    
+    private static int mds = 0;
 	public static void main(String[] args) {
 		new Receiver();
 	}
+	
 	
 /* -------------------------------- FUNCTIONS --------------------------------
 * This is where functions involving the transfer is created to be used with
@@ -43,12 +44,12 @@ public class Receiver extends JFrame
 		
 		if (rdtBool) {
 			total = rdt(outFile, rsocket, sport, address);
-			byte [] finalData = new byte[100];
+			byte [] finalData = new byte[filePckt.getLength()];
 			DatagramPacket rcvd = new DatagramPacket (finalData, finalData.length);
 			rsocket.receive(rcvd);
 		} else {
 			total = udt(outFile, rsocket, sport, address);
-			byte [] finalData = new byte[100];
+			byte [] finalData = new byte[filePckt.getLength()];
 			DatagramPacket rcvd = new DatagramPacket (finalData, finalData.length);
 			rsocket.receive(rcvd);
 		}
@@ -107,7 +108,7 @@ public class Receiver extends JFrame
 				 */
 				if (seqNum == (last+1)) {
 					last = seqNum;
-					System.arraycopy(msg, 3, fileArr, 0, 1021);
+					System.arraycopy(msg, 3, fileArr, 0, fileArr.length);
 					
 					// write to file
 					sendACK(last, ssocket, address, port);
@@ -132,8 +133,8 @@ public class Receiver extends JFrame
 		int last = 0;
 		
 		while (true) {
-			byte[] msg = new byte [1024];
-			byte [] fileArr = new byte [1021];
+			byte[] msg = new byte [mds];
+			byte [] fileArr = new byte [(mds-3)];
 			
 			// receive pckt and msg
 			DatagramPacket rcvd = new DatagramPacket(msg, msg.length);
@@ -157,7 +158,7 @@ public class Receiver extends JFrame
 			 */
 			if (seqNum == (last+1)) {
 				last = seqNum;
-				System.arraycopy(msg, 3, fileArr, 0, 1021);
+				System.arraycopy(msg, 3, fileArr, 0, fileArr.length);
 				
 				// write to file
 				sendACK(last, ssocket, address, port);
