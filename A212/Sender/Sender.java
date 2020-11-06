@@ -67,7 +67,7 @@ public class Sender {
 		
 		Timer t = new Timer();
 		t.reset();
-		for (int i = 0; i < fileArr.length; i+= 1021) {
+		for (int i = 0; i < fileArr.length; i+= (mds-3)) {
 			seqNum += 1;
 			/*
 			 * creating msg with the given MDS
@@ -79,7 +79,7 @@ public class Sender {
 			msg[0] = (byte) (seqNum >> 8); 
 			msg[1] = (byte) (seqNum); 
 			
-			if ((i + 1021) >= fileArr.length) {
+			if ((i + (mds-3)) >= fileArr.length) {
 				flag = true;
 				msg[2] = (byte) (1);
 			} else {
