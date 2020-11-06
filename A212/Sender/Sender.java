@@ -62,6 +62,7 @@ public class Sender {
 		int seqNum = 0;
 		boolean flag;
 		int ackSeq = 0;
+		int packetsTotal = 0;
 		// 2 bytes for msgs; since les than 1024 (1023) it will be 1021 + 2 so the first 2 bytes are for the msg seqNum
 		
 		Timer t = new Timer();
@@ -93,18 +94,19 @@ public class Sender {
 			 */
 			
 			if (!flag) {
-				System.arraycopy(fileArr, i, msg, 3, 1021);
+				System.arraycopy(fileArr, i, msg, 3, mds-3);
 			} else {
 				System.arraycopy(fileArr, i, msg, 3, fileArr.length-i);
 			}
 			
 			//pckt sending
 			DatagramPacket sendPacket = new DatagramPacket(msg, msg.length, ip, rport);
-			int packetsTotal = 0;
+			
 			if (i != 0) {
 				socket.send(sendPacket);
 				packetsTotal++;
 				System.out.println("Sent: Sequence number = " + seqNum);
+				System.out.println("Packets sent after #" + seqNum + " = " + packetsTotal);
 			}
 			
 			// ack? yes or no
@@ -146,10 +148,10 @@ public class Sender {
 					break;
 				}
 				
-			}
-			t.time(Timer.Kind.A);
-			System.out.println("Total Packets Sent: " + packetsTotal + "\nTime (ms): " + t.toString());		
+			}	
  		}
+		t.time(Timer.Kind.A);
+		System.out.println("Total Time (ms): " + t.toString());	
 	}
 	
 	
