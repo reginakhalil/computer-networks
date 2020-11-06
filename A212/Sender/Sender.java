@@ -27,11 +27,8 @@ public class Sender {
 		maxData = Integer.parseInt(args[4]);
 		timeout = Integer.parseInt(args[5]);
 		initSend(recPort, IPaddr, file, maxData, timeout, sendPort);
-
-	
 	}
 	
-
 	/*
 	 * function initializes the sending of the file given the 2 ports and 
 	 * creats a datagrapm packet to send and receive. 
@@ -63,7 +60,7 @@ public class Sender {
 		boolean flag;
 		int ackSeq = 0;
 		int packetsTotal = 0;
-		// 2 bytes for msgs; since les than 1024 (1023) it will be 1021 + 2 so the first 2 bytes are for the msg seqNum
+		// 2 bytes for msgs; so we do mds-3 because it'll increment according to mds
 		
 		Timer t = new Timer();
 		t.reset();
@@ -189,7 +186,6 @@ class Timer {
 		String sep = "";
 		for (int i = 0; i < times.length; i++) {
 			buff.append(sep);
-			sep = ",";
 			buff.append(times[i]);
 		}
 		buff.append("ms");
